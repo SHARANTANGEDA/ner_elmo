@@ -46,4 +46,4 @@ def retrieve_features(data_type, label_list, max_seq_length):
     # tokens = pad_sequences(tokens_list, maxlen=max_seq_length, dtype="long", truncating="post", padding="post")
     # labels = pad_sequences(label_id_list, maxlen=max_seq_length, dtype="long", truncating="post", padding="post")
     
-    return tokens, labels
+    return tokens_list, label_id_list
