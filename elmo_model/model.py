@@ -16,16 +16,19 @@ from metrics.metrics import recall_m, precision_m, f1_m
 import constants as c
 
 
-def elmo_model():
-    input_text = Input(shape=(c.MAX_SEQ_LENGTH,), dtype=tf.string)
-    embedding = Lambda(lambda x: c.ELMO_MODEL(
+def elmo_embedding_layer(x):
+    return c.ELMO_MODEL(
         inputs={
             "tokens": tf.squeeze(tf.cast(x, tf.string)),
             "sequence_len": tf.constant(c.BATCH_SIZE * [c.MAX_SEQ_LENGTH])
         },
         signature="tokens",
-        as_dict=True)["elmo"],
-                       output_shape=(c.MAX_SEQ_LENGTH, 1024))(input_text)
+        as_dict=True)["elmo"]
+
+
+def elmo_model():
+    input_text = Input(shape=(c.MAX_SEQ_LENGTH,), dtype=tf.string)
+    embedding = Lambda(elmo_embedding_layer, output_shape=(c.MAX_SEQ_LENGTH, 1024))(input_text)
     x = Bidirectional(LSTM(units=512, return_sequences=True, recurrent_dropout=0.2, dropout=0.2))(embedding)
     x_rnn = Bidirectional(LSTM(units=512, return_sequences=True, recurrent_dropout=0.2, dropout=0.2))(x)
     x = add([x, x_rnn])  # residual connection to the first biLSTM
@@ -39,6 +42,7 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     
     # Build Model
     model = elmo_model()
+    model.summary()
     
     # Add Optimizer and loss metrics
     optimizer = tf.keras.optimizers.Adam(learning_rate=init_lr, epsilon=epsilon, beta_1=beta_1, beta_2=beta_2)

@@ -7,6 +7,8 @@ PROCESSED_DATASET_DIR = os.getenv("PROCESSED_DATASET_DIR")
 MODEL_OUTPUT_DIR = os.getenv("MODEL_OUTPUT_DIR")
 ML_FLOW_SAVE_DIR = os.getenv("ML_FLOW_SAVE_DIR")
 LOGS_DIR = os.getenv("LOGS_DIR")
+PRE_TRAINED_MODEL_DIR = os.getenv("PRE_TRAINED_MODEL_DIR")
+
 
 """
 here "X" used to represent "##eer","##soo" and so on!
@@ -20,5 +22,6 @@ VALIDATION_FILE = "validation.csv"
 TEST_FILE = "test.csv"
 TOTAL_FILE = "total.csv"
 
-ELMO_MODEL = hub.Module("https://tfhub.dev/google/elmo/2", trainable=True)
+ELMO_MODEL = hub.load(PRE_TRAINED_MODEL_DIR)
+
 BATCH_SIZE = 32
