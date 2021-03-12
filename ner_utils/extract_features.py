@@ -1,9 +1,7 @@
 import os
-import pickle
 from tqdm import tqdm
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-import tensorflow as tf
 
 from ner_utils.pre_process import read_dataset
 import constants as c
@@ -41,9 +39,7 @@ def retrieve_features(data_type, label_list, max_seq_length):
     for (i, label) in enumerate(label_list):
         label_map[label] = i
     tokens_list, label_id_list = convert_to_input(X, y, label_map, max_seq_length)
-    tokens = pad_sequences(tokens_list, maxlen=max_seq_length, dtype="long", truncating="post",
-                           padding="post")
-    labels = pad_sequences(label_id_list, maxlen=max_seq_length, dtype="long", truncating="post",
-                           padding="post")
+    tokens = pad_sequences(tokens_list, maxlen=max_seq_length, dtype="long", truncating="post", padding="post")
+    labels = pad_sequences(label_id_list, maxlen=max_seq_length, dtype="long", truncating="post", padding="post")
     
     return tokens, labels
