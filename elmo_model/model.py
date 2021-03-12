@@ -10,6 +10,8 @@ from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional,
 from tensorflow.keras.layers import add
 from tensorflow.keras.models import Model
 from tensorflow.keras import Input
+from tensorflow.python.framework.ops import disable_eager_execution
+
 
 from ner_utils import extract_features
 from metrics.metrics import recall_m, precision_m, f1_m
@@ -36,6 +38,7 @@ def elmo_model():
 def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     """Create Features & Tokenize"""
     logging.getLogger().setLevel(logging.INFO)
+    disable_eager_execution()
     
     # Build Model
     model = elmo_model()
@@ -47,7 +50,7 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     
     logging.info("Compiling Model ...")
-    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics, experimental_run_tf_function=False)
     logging.info("Model has been compiled")
     
     # Retrieve Features
