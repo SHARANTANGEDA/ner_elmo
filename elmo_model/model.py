@@ -47,8 +47,7 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     # Add Optimizer and loss metrics
     optimizer = tf.keras.optimizers.Adam(learning_rate=init_lr, epsilon=epsilon, beta_1=beta_1, beta_2=beta_2)
     
-    f1_metric = F1Metric()
-    metrics = [keras.metrics.SparseCategoricalAccuracy('accuracy', dtype=tf.float32), f1_metric]
+    metrics = [keras.metrics.SparseCategoricalAccuracy('accuracy', dtype=tf.float32)]
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     
     logging.info("Compiling Model ...")
@@ -62,8 +61,9 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     
     # Training the model
     logging.info("Test Validation features are ready")
+    f1_metric = F1Metric(val_data=(np.array(val_tokens), val_labels))
     model.fit(np.array(train_tokens), train_labels, epochs=epochs, batch_size=c.BATCH_SIZE,
-              validation_data=(np.array(val_tokens), val_labels))
+              validation_data=(np.array(val_tokens), val_labels), callbacks=[f1_metric])
     logging.info("Model Fitting is done")
     
     # Save Model
