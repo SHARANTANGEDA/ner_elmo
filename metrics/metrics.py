@@ -23,7 +23,9 @@ def _prep_predictions(y_true, y_pred):
         y_pred = math_ops.cast(y_pred, K.dtype(y_true))
         
     print(type(y_true), type(y_pred))
-    return np.array(y_true), np.array(y_pred)
+    y_true_filtered = y_true.eval(session=tf.Session())
+    y_pred_filtered = y_pred.eval(session=tf.Session())
+    return y_true_filtered, y_pred_filtered
 
 
 def macro_recall(y_true, y_pred):
