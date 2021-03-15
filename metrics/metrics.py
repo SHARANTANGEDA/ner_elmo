@@ -3,7 +3,6 @@ from sklearn.metrics import f1_score, precision_score, recall_score, classificat
 from tensorflow.python.framework import ops
 from tensorflow.python.keras import backend as K
 from tensorflow.python.ops import math_ops
-import tensorflow as tf
 import constants as c
 
 
@@ -21,7 +20,7 @@ def _prep_predictions(y_true, y_pred):
     if K.dtype(y_pred) != K.dtype(y_true):
         y_pred = math_ops.cast(y_pred, K.dtype(y_true))
 
-    return y_true.eval(session=tf.Session()), y_pred.eval(session=tf.Session())
+    return y_true.eval(), y_pred.eval()
 
 
 def macro_recall(y_true, y_pred):
