@@ -9,7 +9,6 @@ import constants as c
 
 
 def _prep_predictions(y_true, y_pred):
-    tf.enable_eager_execution()
     y_pred_rank = ops.convert_to_tensor(y_pred).shape.ndims
     y_true_rank = ops.convert_to_tensor(y_true).shape.ndims
     # If the shape of y_true is (num_samples, 1), squeeze to (num_samples,)
