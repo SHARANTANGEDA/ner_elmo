@@ -20,13 +20,14 @@ from tensorflow.python.keras.backend import set_session
 from tensorflow.python.keras.models import load_model
 
 
+
 def elmo_embedding_layer(x):
     return c.ELMO_MODEL(inputs={
-        "tokens": tf.squeeze(tf.cast(x, tf.string)),
-        "sequence_len": tf.constant(c.BATCH_SIZE * [c.MAX_SEQ_LENGTH])
-    },
-        signature="tokens",
-        as_dict=True)["elmo"]
+                            "tokens": tf.squeeze(tf.cast(x, tf.string)),
+                            "sequence_len": tf.constant(c.BATCH_SIZE*[c.MAX_SEQ_LENGTH])
+                      },
+                      signature="tokens",
+                      as_dict=True)["elmo"]
 
 
 def elmo_model():
@@ -42,7 +43,7 @@ def elmo_model():
 def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     sess = tf.Session()
     graph = tf.get_default_graph()
-    
+   
     # IMPORTANT: models have to be loaded AFTER SETTING THE SESSION for keras!
     # Otherwise, their weights will be unavailable in the threads after the session there has been set
     set_session(sess)
@@ -70,10 +71,8 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     
     # Training the model
     logging.info("Test Validation features are ready")
-    with graph.as_default():
-        set_session(sess)
-        model.fit(np.array(train_tokens), train_labels, epochs=epochs, batch_size=c.BATCH_SIZE,
-                  validation_data=(np.array(val_tokens), val_labels))
+    model.fit(np.array(train_tokens), train_labels, epochs=epochs, batch_size=c.BATCH_SIZE,
+              validation_data=(np.array(val_tokens), val_labels))
     logging.info("Model Fitting is done")
     
     # Save Model
@@ -83,33 +82,29 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     logging.info("Model Saved")
     
     # Compute Scores
-    with graph.as_default():
-        set_session(sess)
-        test_loss, test_acc = model.evaluate(np.array(test_tokens), test_labels, batch_size=c.BATCH_SIZE)
-    
+    test_loss, test_acc = model.evaluate(np.array(test_tokens), test_labels, batch_size=c.BATCH_SIZE)
+
     logging.info({"Loss": test_loss, "Accuracy": test_acc})
-    
+
     # evaluate model with sklearn
-    with graph.as_default():
-        set_session(sess)
-        predictions = model.predict(np.array(test_tokens), batch_size=c.BATCH_SIZE, verbose=1)
+    predictions = model.predict(np.array(test_tokens), batch_size=c.BATCH_SIZE, verbose=1)
     print(predictions)
     sk_report = get_classification_report(test_labels, predictions)
     f1_score_sk = macro_f1(test_labels, predictions)
     micro_f1_score = micro_f1(test_labels, predictions)
     macro_precision_score = macro_precision(test_labels, predictions)
     macro_recall_score = macro_recall(test_labels, predictions)
-    
+
     print('\n')
     print(sk_report)
     logging.info(sk_report)
-    
+
     logging.info("****TEST METRICS****")
     metrics_dict = {"Loss": test_loss, "CatAcc": test_acc, "Macro_F1": f1_score_sk, "Micro_F1": micro_f1_score,
                     "Macro_Precision": macro_precision_score, "Macro_Recall": macro_recall_score}
     logging.info(str(metrics_dict))
     mlflow.log_metrics(metrics_dict)
-    
+
     return save_dir_path, [
         f'epochs:{epochs}', f'batch_size: {c.BATCH_SIZE}', f'epsilon: {epsilon}', f'init_lr: {init_lr}',
         f'beta_1: {beta_1}', f'beta_2: {beta_2}'], f'elmo_{test_acc}_{f1_score_sk}_{uuid.uuid4()}'
