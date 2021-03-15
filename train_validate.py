@@ -1,6 +1,9 @@
 import logging
 import os
 from datetime import datetime
+import tensorflow as tf
+tf.enable_eager_execution()
+
 from elmo_model.model import train_test
 import mlflow
 import constants as c
