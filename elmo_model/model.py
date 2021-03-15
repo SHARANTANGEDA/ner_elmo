@@ -7,6 +7,8 @@ import mlflow
 import numpy as np
 
 import tensorflow as tf
+tf.enable_eager_execution()
+
 from tensorflow import keras
 from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Lambda
 from tensorflow.keras.layers import add
