@@ -5,6 +5,7 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.ops import math_ops
 import tensorflow as tf
 import constants as c
+import numpy as np
 
 
 def _prep_predictions(y_true, y_pred):
@@ -21,9 +22,8 @@ def _prep_predictions(y_true, y_pred):
     if K.dtype(y_pred) != K.dtype(y_true):
         y_pred = math_ops.cast(y_pred, K.dtype(y_true))
         
-    sess = K.get_session()
     print(type(y_true), type(y_pred))
-    return y_true.eval(session=sess), y_pred.eval(session=sess)
+    return np.array(y_true), np.array(y_pred)
 
 
 def macro_recall(y_true, y_pred):
