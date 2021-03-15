@@ -19,10 +19,12 @@ import constants as c
 
 
 def elmo_embedding_layer(x):
-    return c.ELMO_MODEL.signatures['tokens'](
-        tokens=tf.squeeze(tf.cast(x, tf.string)),
-        sequence_len=tf.constant(c.BATCH_SIZE * [c.MAX_SEQ_LENGTH])
-    )['elmo']
+    return c.ELMO_MODEL(inputs={
+                            "tokens": tf.squeeze(tf.cast(x, tf.string)),
+                            "sequence_len": tf.constant(c.BATCH_SIZE*[c.MAX_SEQ_LENGTH])
+                      },
+                      signature="tokens",
+                      as_dict=True)["elmo"]
 
 
 def elmo_model():
