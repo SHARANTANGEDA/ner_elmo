@@ -22,26 +22,25 @@ def _prep_predictions(y_true, y_pred):
     if K.dtype(y_pred) != K.dtype(y_true):
         y_pred = math_ops.cast(y_pred, K.dtype(y_true))
         
-    print(type(y_true), type(y_pred))
-    y_true_filtered = y_true.eval(session=tf.Session())
-    y_pred_filtered = y_pred.eval(session=tf.Session())
-    return y_true_filtered, y_pred_filtered
+    return y_true, y_pred
 
 
 def macro_recall(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return recall_score(y_true_filter, y_pred_filter, average='macro')
+    return recall_score(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()),
+                        average='macro')
 
 
 def macro_precision(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return precision_score(y_true_filter, y_pred_filter, average='macro')
+    return precision_score(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()),
+                           average='macro')
 
 
 def micro_f1(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
     
-    return f1_score(y_true_filter, y_pred_filter, average='micro')
+    return f1_score(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()), average='micro')
 
 
 def macro_f1(y_true, y_pred):
