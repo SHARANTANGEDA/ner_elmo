@@ -1,11 +1,12 @@
 import logging
 import os
 from datetime import datetime
+import tensorflow as tf
+tf.enable_eager_execution()
 
 from elmo_model.model import train_test
 import mlflow
 import constants as c
-import tensorflow as tf
 
 logging.basicConfig(filename=os.path.join(c.LOGS_DIR, f'{datetime.now()}.txt'),
                     filemode='w+',
@@ -21,7 +22,6 @@ logging.info("Artifact Location: {}".format(experiment.artifact_location))
 logging.info("Tags: {}".format(experiment.tags))
 logging.info("Lifecycle_stage: {}".format(experiment.lifecycle_stage))
 
-tf.enable_eager_execution()
 
 mlflow.tensorflow.autolog(log_models=True, disable=False, exclusive=False)
 with mlflow.start_run(experiment_id=c.ML_FLOW_EXPERIMENT_ID):
