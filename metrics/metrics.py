@@ -51,10 +51,8 @@ import constants as c
 #     #     print(" — val_f1: % f — val_precision: % f — val_recall % f" % (_val_f1, _val_precision, _val_recall))
 
 def _prep_predictions(y_true, y_pred):
-    y_pred = ops.convert_to_tensor_v2_with_dispatch(y_pred)
-    y_true = ops.convert_to_tensor_v2_with_dispatch(y_true)
-    y_pred_rank = y_pred.shape.ndims
-    y_true_rank = y_true.shape.ndims
+    y_pred_rank = ops.convert_to_tensor(y_pred).shape.ndims
+    y_true_rank = ops.convert_to_tensor(y_true).shape.ndims
     # If the shape of y_true is (num_samples, 1), squeeze to (num_samples,)
     if (y_true_rank is not None) and (y_pred_rank is not None) and (len(
             K.int_shape(y_true)) == len(K.int_shape(y_pred))):
