@@ -50,7 +50,7 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     
     logging.info("Compiling Model ...")
-    model.compile(optimizer=optimizer, loss=loss, metrics=metrics, experimental_run_tf_function=False)
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     logging.info("Model has been compiled")
     
     # Retrieve Features

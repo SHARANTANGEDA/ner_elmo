@@ -45,9 +45,9 @@ def micro_f1(y_true, y_pred):
 
 def macro_f1(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return f1_score(y_true_filter, y_pred_filter, average='macro')
+    return f1_score(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()), average='macro')
 
 
 def get_classification_report(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return classification_report(y_true_filter, y_pred_filter, digits=len(c.LABELS), labels=c.LABELS)
+    return classification_report(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()), digits=len(c.LABELS), labels=c.LABELS)
