@@ -40,7 +40,6 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     logging.getLogger().setLevel(logging.INFO)
     #
     # Build Model
-    tf.enable_eager_execution()
     model = elmo_model()
     model.summary()
     
