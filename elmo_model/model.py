@@ -17,6 +17,7 @@ from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro
 from ner_utils import extract_features
 import constants as c
 from tensorflow.python.keras.backend import set_session
+from tensorflow.python.keras import backend as K
 
 
 def elmo_embedding_layer(x):
@@ -40,11 +41,12 @@ def elmo_model():
 
 def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     sess = tf.Session()
-    graph = tf.get_default_graph()
+    K.set_session(sess)
+    sess.run(tf.global_variables_initializer())
+    sess.run(tf.tables_initializer())
    
     # IMPORTANT: models have to be loaded AFTER SETTING THE SESSION for keras!
     # Otherwise, their weights will be unavailable in the threads after the session there has been set
-    set_session(sess)
     """Create Features & Tokenize"""
     logging.getLogger().setLevel(logging.INFO)
     #
