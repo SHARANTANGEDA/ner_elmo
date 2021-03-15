@@ -23,6 +23,6 @@ VALIDATION_FILE = "validation.csv"
 TEST_FILE = "test.csv"
 TOTAL_FILE = "total.csv"
 
-ELMO_MODEL = hub.Module("https://tfhub.dev/google/elmo/2", trainable=True)
+ELMO_MODEL = hub.Module(PRE_TRAINED_MODEL_DIR, trainable=True)
 
 BATCH_SIZE = 32

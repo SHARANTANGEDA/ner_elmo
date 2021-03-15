@@ -17,8 +17,6 @@ from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro
 from ner_utils import extract_features
 import constants as c
 from tensorflow.python.keras.backend import set_session
-from tensorflow.python.keras.models import load_model
-
 
 
 def elmo_embedding_layer(x):
