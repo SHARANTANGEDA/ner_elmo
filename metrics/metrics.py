@@ -4,7 +4,6 @@ from tensorflow.python.framework import ops
 from tensorflow.python.keras import backend as K
 from tensorflow.python.ops import math_ops
 import tensorflow as tf
-
 import constants as c
 
 
@@ -21,30 +20,31 @@ def _prep_predictions(y_true, y_pred):
     # to match.
     if K.dtype(y_pred) != K.dtype(y_true):
         y_pred = math_ops.cast(y_pred, K.dtype(y_true))
-    return y_true, y_pred
+
+    return y_true.eval(session=tf.Session()), y_pred.eval(session=tf.Session())
 
 
 def macro_recall(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return recall_score(y_true_filter.numpy(), y_pred_filter.numpy(), average='macro')
+    return recall_score(y_true_filter, y_pred_filter, average='macro')
 
 
 def macro_precision(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return precision_score(y_true_filter.numpy(), y_pred_filter.numpy(), average='macro')
+    return precision_score(y_true_filter, y_pred_filter, average='macro')
 
 
 def micro_f1(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
     
-    return f1_score(y_true_filter.numpy(), y_pred_filter.numpy(), average='micro')
+    return f1_score(y_true_filter, y_pred_filter, average='micro')
 
 
 def macro_f1(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return f1_score(y_true_filter.numpy(), y_pred_filter.numpy(), average='macro')
+    return f1_score(y_true_filter, y_pred_filter, average='macro')
 
 
 def get_classification_report(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return classification_report(y_true_filter.numpy(), y_pred_filter.numpy(), digits=len(c.LABELS), labels=c.LABELS)
+    return classification_report(y_true_filter, y_pred_filter, digits=len(c.LABELS), labels=c.LABELS)
