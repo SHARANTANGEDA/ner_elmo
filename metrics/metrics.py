@@ -4,6 +4,8 @@ from tensorflow.python.framework import ops
 from tensorflow.python.keras import backend as K
 from tensorflow.python.ops import math_ops
 import tensorflow as tf
+from tensorflow_core.python.keras.callbacks import Callback
+
 import constants as c
 import numpy as np
 
@@ -21,7 +23,7 @@ def _prep_predictions(y_true, y_pred):
     # to match.
     if K.dtype(y_pred) != K.dtype(y_true):
         y_pred = math_ops.cast(y_pred, K.dtype(y_true))
-        
+    
     return y_true, y_pred
 
 
@@ -60,4 +62,29 @@ def macro_f1(y_true, y_pred):
 
 def get_classification_report(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
-    return classification_report(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()), digits=len(c.LABELS), labels=c.LABELS)
+    return classification_report(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()),
+                                 digits=len(c.LABELS), labels=c.LABELS)
+
+
+class F1Metric(Callback):
+    def __init__(self, x_val, y_val):
+        super(F1Metric, self).__init__()
+        self.val_input = x_val
+        self.val_output = y_val
+    
+    def on_train_begin(self, logs={}):
+        self.val_f1s = []
+        self.val_recalls = []
+        self.val_precisions = []
+    
+    def on_epoch_end(self, epoch, logs={}):
+        val_predict = self.model.predict(self.val_input)
+        val_targ = self.val_output
+        _val_f1 = f1_score(val_targ, val_predict, average="macro")
+        _val_recall = recall_score(val_targ, val_predict)
+        _val_precision = precision_score(val_targ, val_predict)
+        self.val_f1s.append(_val_f1)
+        self.val_recalls.append(_val_recall)
+        self.val_precisions.append(_val_precision)
+        print(" — val_f1_v2: % f — val_precision_v2: % f — val_recall_v2 % f" % (_val_f1, _val_precision, _val_recall))
+        #

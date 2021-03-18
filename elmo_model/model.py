@@ -5,19 +5,17 @@ from datetime import datetime
 
 import mlflow
 import numpy as np
-
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras import Input
 from tensorflow.keras.layers import LSTM, Dense, TimeDistributed, Bidirectional, Lambda
 from tensorflow.keras.layers import add
 from tensorflow.keras.models import Model
-from tensorflow.keras import Input
-
-from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro_precision, macro_recall
-from ner_utils import extract_features
-import constants as c
-from tensorflow.python.keras.backend import set_session
 from tensorflow.python.keras import backend as K
+
+import constants as c
+from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro_precision, macro_recall, F1Metric
+from ner_utils import extract_features
 
 
 def elmo_embedding_layer(x):
@@ -72,12 +70,13 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     # Training the model
     logging.info("Test Validation features are ready")
     model.fit(np.array(train_tokens), train_labels, epochs=epochs, batch_size=c.BATCH_SIZE,
-              validation_data=(np.array(val_tokens), val_labels))
+              validation_data=(np.array(val_tokens), val_labels),
+              callbacks=[F1Metric(np.array(val_tokens), val_labels)])
     logging.info("Model Fitting is done")
     
     # Save Model
     save_dir_path = os.path.join(c.MODEL_OUTPUT_DIR, str(datetime.utcnow()))
-    os.mkdir(save_dir_path)
+    os.makedirs(save_dir_path, exist_ok=True)
     tf.saved_model.save(model, export_dir=save_dir_path)
     logging.info("Model Saved")
     
