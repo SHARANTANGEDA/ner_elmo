@@ -2,7 +2,7 @@ import os
 import tensorflow_hub as hub
 
 """Initialize ENV Variables"""
-MAX_SEQ_LENGTH = int(os.getenv("MAX_SEQ_LENGTH"))
+MAX_SEQ_LENGTH = int(os.getenv("ELMO_MAX_SEQ_LENGTH"))
 PROCESSED_DATASET_DIR = os.getenv("PROCESSED_DATASET_DIR")
 MODEL_OUTPUT_DIR = os.getenv("MODEL_OUTPUT_DIR")
 ML_FLOW_SAVE_DIR = os.getenv("ML_FLOW_SAVE_DIR")
@@ -25,4 +25,4 @@ TOTAL_FILE = "total.csv"
 
 ELMO_MODEL = hub.Module(PRE_TRAINED_MODEL_DIR, trainable=True)
 
-BATCH_SIZE = 32
+BATCH_SIZE = int(os.getenv("ELMO_BATCH_SIZE", 32))
