@@ -10,6 +10,58 @@ import constants as c
 import numpy as np
 
 
+class EvalMetrics(Callback):
+    
+    def __init__(self, val_data, labels, batch_size):
+        super().__init__()
+        self.validation_X = val_data
+        self.label_data = labels
+        self.batch_size = batch_size
+    
+    def on_train_begin(self, logs={}):
+        print(self.validation_X)
+        self.val_f1s = []
+        self.val_f1s_micro = []
+        self.val_recalls = []
+        self.val_precisions = []
+    
+    def on_epoch_end(self, epoch, logs={}):
+        predictions = np.argmax(self.model.predict(self.validation_X, batch_size=self.batch_size, verbose=1).logits,
+                                axis=-1)
+        print(np.shape(predictions))
+        sk_report, macro_f1_score, micro_f1_score, macro_recall_score, macro_precision_score = calculate_pred_metrics(
+            self.label_data, predictions)
+        print(sk_report)
+        
+        self.val_f1s.append(macro_f1_score)
+        self.val_recalls.append(macro_recall_score)
+        self.val_precisions.append(macro_precision_score)
+        self.val_f1s_micro.append(micro_f1_score)
+        print(f'-Micro F1: {micro_f1_score}, Macro F1: {macro_f1_score}, Recall: {macro_recall_score},'
+              f' Precision: {macro_precision_score}')
+
+
+# val_predict = self.model.predict(self.val_input)
+# val_targ = self.val_output
+# _val_f1 = f1_score(val_targ, val_predict, average="macro")
+# _val_recall = recall_score(val_targ, val_predict)
+# _val_precision = precision_score(val_targ, val_predict)
+# self.val_f1s.append(_val_f1)
+# self.val_recalls.append(_val_recall)
+# self.val_precisions.append(_val_precision)
+# print(" — val_f1_v2: % f — val_precision_v2: % f — val_recall_v2 % f" % (_val_f1, _val_precision, _val_recall))
+
+
+def calculate_pred_metrics(y_true, y_pred):
+    # true_f, pred_f = _prep_predictions(y_true, y_pred)
+    print(y_true.shape, y_pred.shape)
+    true_f, pred_f = np.reshape(y_true, (len(y_true) * c.MAX_SEQ_LENGTH,)), np.reshape(y_pred, (len(y_pred),))
+    print(true_f.shape, pred_f.shape)
+    return classification_report(y_true=true_f, y_pred=pred_f), f1_score(
+        true_f, pred_f, average='macro'), f1_score(true_f, pred_f, average='micro'), recall_score(
+        true_f, pred_f, average='macro'), precision_score(true_f, pred_f, average='macro')
+
+
 def _prep_predictions(y_true, y_pred):
     y_pred_rank = ops.convert_to_tensor(y_pred).shape.ndims
     y_true_rank = ops.convert_to_tensor(y_true).shape.ndims
@@ -64,27 +116,3 @@ def get_classification_report(y_true, y_pred):
     y_true_filter, y_pred_filter = _prep_predictions(y_true, y_pred)
     return classification_report(y_true_filter.eval(session=tf.Session()), y_pred_filter.eval(session=tf.Session()),
                                  digits=len(c.LABELS), labels=c.LABELS)
-
-
-class F1Metric(Callback):
-    def __init__(self, x_val, y_val):
-        super(F1Metric, self).__init__()
-        self.val_input = x_val
-        self.val_output = y_val
-    
-    def on_train_begin(self, logs={}):
-        self.val_f1s = []
-        self.val_recalls = []
-        self.val_precisions = []
-    
-    def on_epoch_end(self, epoch, logs={}):
-        val_predict = self.model.predict(self.val_input)
-        val_targ = self.val_output
-        _val_f1 = f1_score(val_targ, val_predict, average="macro")
-        _val_recall = recall_score(val_targ, val_predict)
-        _val_precision = precision_score(val_targ, val_predict)
-        self.val_f1s.append(_val_f1)
-        self.val_recalls.append(_val_recall)
-        self.val_precisions.append(_val_precision)
-        print(" — val_f1_v2: % f — val_precision_v2: % f — val_recall_v2 % f" % (_val_f1, _val_precision, _val_recall))
-        #

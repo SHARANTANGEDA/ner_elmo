@@ -14,7 +14,7 @@ from tensorflow.keras.models import Model
 from tensorflow.python.keras import backend as K
 
 import constants as c
-from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro_precision, macro_recall, F1Metric
+from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro_precision, macro_recall, EvalMetrics
 from ner_utils import extract_features
 
 
@@ -71,7 +71,7 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     logging.info("Test Validation features are ready")
     model.fit(np.array(train_tokens), train_labels, epochs=epochs, batch_size=c.BATCH_SIZE,
               validation_data=(np.array(val_tokens), val_labels),
-              callbacks=[F1Metric(np.array(val_tokens), val_labels)])
+              callbacks=[EvalMetrics(np.array(val_tokens), val_labels, c.BATCH_SIZE)])
     logging.info("Model Fitting is done")
     
     # Save Model
