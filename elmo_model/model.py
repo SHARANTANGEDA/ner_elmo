@@ -1,7 +1,7 @@
 import logging
 import os
+import time
 import uuid
-from datetime import datetime
 
 import mlflow
 import numpy as np
@@ -14,7 +14,8 @@ from tensorflow.keras.models import Model
 from tensorflow.python.keras import backend as K
 
 import constants as c
-from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro_precision, macro_recall, EvalMetrics
+from metrics.metrics import macro_f1, get_classification_report, micro_f1, macro_precision, macro_recall, EvalMetrics, \
+    calculate_pred_metrics
 from ner_utils import extract_features
 
 
@@ -70,40 +71,37 @@ def train_test(epochs, epsilon=1e-7, init_lr=2e-5, beta_1=0.9, beta_2=0.999):
     # Training the model
     logging.info("Test Validation features are ready")
     model.fit(np.array(train_tokens), train_labels, epochs=epochs, batch_size=c.BATCH_SIZE,
-              validation_data=(np.array(val_tokens), val_labels),
-              callbacks=[EvalMetrics(np.array(val_tokens), val_labels, c.BATCH_SIZE)])
+              validation_data=(np.array(val_tokens), val_labels))
     logging.info("Model Fitting is done")
     
     # Save Model
-    save_dir_path = os.path.join(c.MODEL_OUTPUT_DIR, str(datetime.utcnow()))
-    os.makedirs(save_dir_path, exist_ok=True)
-    tf.saved_model.save(model, export_dir=save_dir_path)
-    logging.info("Model Saved")
+    save_dir_path = os.path.join(c.MODEL_OUTPUT_DIR, "model_"+str(time.time()))
+    os.mkdir(save_dir_path)
+    # tf.saved_model.save(model, export_dir=save_dir_path)
+    model.save_pretrained(save_dir_path, saved_model=True)
+    logging.info("Model Saved at: {}".format(save_dir_path))
     
     # Compute Scores
-    test_loss, test_acc = model.evaluate(np.array(test_tokens), test_labels, batch_size=c.BATCH_SIZE)
+    test_loss, test_acc = model.evaluate(x=np.array(test_tokens), y=test_labels, batch_size=c.BATCH_SIZE)
 
     logging.info({"Loss": test_loss, "Accuracy": test_acc})
 
     # evaluate model with sklearn
-    predictions = model.predict(np.array(test_tokens), batch_size=c.BATCH_SIZE, verbose=1)
-    print(predictions)
-    sk_report = get_classification_report(test_labels, predictions)
-    f1_score_sk = macro_f1(test_labels, predictions)
-    micro_f1_score = micro_f1(test_labels, predictions)
-    macro_precision_score = macro_precision(test_labels, predictions)
-    macro_recall_score = macro_recall(test_labels, predictions)
+    predictions = np.argmax(model.predict(np.array(test_tokens), batch_size=c.BATCH_SIZE, verbose=1).logits, axis=-1)
+    print(np.shape(predictions), np.shape(test_labels))
+    sk_report, macro_f1_score, micro_f1_score, macro_recall_score, macro_precision_score = calculate_pred_metrics(
+        test_labels, predictions)
 
     print('\n')
     print(sk_report)
     logging.info(sk_report)
 
     logging.info("****TEST METRICS****")
-    metrics_dict = {"Loss": test_loss, "CatAcc": test_acc, "Macro_F1": f1_score_sk, "Micro_F1": micro_f1_score,
+    metrics_dict = {"Loss": test_loss, "CatAcc": test_acc, "Macro_F1": macro_f1_score, "Micro_F1": micro_f1_score,
                     "Macro_Precision": macro_precision_score, "Macro_Recall": macro_recall_score}
     logging.info(str(metrics_dict))
     mlflow.log_metrics(metrics_dict)
 
     return save_dir_path, [
         f'epochs:{epochs}', f'batch_size: {c.BATCH_SIZE}', f'epsilon: {epsilon}', f'init_lr: {init_lr}',
-        f'beta_1: {beta_1}', f'beta_2: {beta_2}'], f'elmo_{test_acc}_{f1_score_sk}_{uuid.uuid4()}'
+        f'beta_1: {beta_1}', f'beta_2: {beta_2}'], f'elmo_{test_acc}_{macro_f1_score}_{uuid.uuid4()}'
