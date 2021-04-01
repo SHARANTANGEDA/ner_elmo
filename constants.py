@@ -18,10 +18,10 @@ here "X" used to represent "##eer","##soo" and so on!
 """
 
 LABELS = ["[PAD]", "B-NAME", "B-LOC", "O", "B-ORG", "B-MISC", "[CLS]", "[SEP]", "X"]
-TRAIN_FILE = "train_merged.csv"
-VALIDATION_FILE = "validation.csv"
-TEST_FILE = "test.csv"
-TOTAL_FILE = "total.csv"
+TRAIN_FILE = "train_os.csv"
+VALIDATION_FILE = "validation_os.csv"
+TEST_FILE = "test_os.csv"
+TOTAL_FILE = "total_over_sampled.csv"
 
 ELMO_MODEL = hub.Module(PRE_TRAINED_MODEL_DIR, trainable=True)
 
